@@ -1,0 +1,420 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>BCSE101 17s2 Programming Assignment 2</title>
+  <script src="src/View.js"></script>
+  <script src="src/Candidate.js"></script>
+  <script src="src/Party.js"></script>
+  <script src="src/Electorate.js"></script>
+  <script src="src/Election.js"></script>
+  <!-- <script src="src/Controller2014.js"></script> -->
+  <!-- <script src="src/Controller2017.js"></script> -->
+  <script src="src/NewZealand.js"></script>
+  <script src="src/Chart.js"></script>
+  <script src="src/utils.js"></script>
+  <link rel="stylesheet" href="stylesheet.css">
+</head>
+
+<body>
+  <header>
+    <div id="inputDiv">
+      <div id="electorateFileInputDiv">
+        <label for='electorateFileInput'>Input Electorate Vote Files</label>
+        <input type="file" id="electorateFileInput" multiple="multiple">
+      </div>
+      <div id="listCandidateFileInputDiv" class="hidden">
+        <label for='listCandidateFileInput'>Input List Candidate Files</label>
+        <input type="file" id="listCandidateFileInput" multiple="multiple">
+      </div>
+      <div id='electorateWinnerFileInputDiv' class="hidden">
+        <label for=''>Input Electorate Winner Files</label>
+        <input type="file" id="electorateWinnerFileInput" multiple="multiple">
+      </div>
+    </div>
+    <div id="headButtonDisplay" class="hidden">
+      <button onclick="showOverview()">Election Overview</button>
+      <button onclick="compareElectorateBetweenYears()">Compare Electorate result of two different years</button>
+    </div>
+    <div id="selectionDisplay"></div>
+  </header>
+  <main>
+    <div id="tableDisplay"></div>
+    <div id = "chartDisplay">
+    </div>
+  </main>
+  <script>
+    /* global  Chart,NewZealand,FileReader,Election,sessionStorage */
+    var NZ = new NewZealand()
+    sessionStorage.setItem('NZ', NZ)
+    var go = function () {
+      changeBackgroundColour('OldLace')
+      var fileInput = document.getElementById('electorateFileInput')
+      fileInput.addEventListener('change', electorateFileChangedHdlr)
+      console.log(NZ)
+    }
+    window.onload = go
+    function changeBackgroundColour(colourCode) {
+      document.body.style.backgroundColor = colourCode
+    }
+    function createButton(id, event, message) {
+      var aButton = document.createElement('button')
+      aButton.id = id
+      aButton.setAttribute('onclick', event)
+      aButton.innerText = message
+      return aButton
+    }
+    // Add <th> to a table
+    function addTh(aTable, ...headerArray) {
+      var row = document.createElement('tr')
+      for (var header of headerArray) {
+        var th = document.createElement('th')
+        th.innerHTML = header
+        row.appendChild(th)
+      }
+      aTable.appendChild(row)
+    }
+    // Add a new row to a table
+    function addNewRow(aTable) {
+      return aTable.insertRow(-1)
+    }
+    // Add a new cell to a row
+    function addCell(aRow, aString) {
+      var cell = aRow.insertCell(-1)
+      cell.innerHTML = aString
+    }
+    function addNewLine(theLine) {
+      var br = document.createElement('br')
+      theLine.appendChild(br)
+    }
+    function clearDiv() {
+      var div = document.getElementById('tableDisplay')
+      div.innerHTML = ''
+      div = document.getElementById('chartDisplay')
+      div.innerHTML = ''
+    }
+    function getSelectedOption(aSelectTag) {
+      var theDropdown = document.getElementById(aSelectTag)
+      var index = theDropdown.selectedIndex
+      return theDropdown.options[index].value
+    }
+    function createYearDropdown(anID) {
+      // Create a dropdown list
+      var dropdownlist = document.createElement('select')
+      dropdownlist.id = anID
+      for (var anElection of NZ.allMyElections) {
+        var anOption = document.createElement('option')
+        anOption.setAttribute('value', anElection.year)
+        anOption.innerHTML = anElection.year
+        dropdownlist.appendChild(anOption)
+      }
+      return dropdownlist
+    }
+    function createElectorateDropdown(year) {
+      var dropdown = document.createElement('select')
+      dropdown.id = 'electorateDropdown'
+      var anElection = NZ.allMyElections.find(e => e.year.toString() === year)
+      for (var anElectorate of anElection.allMyElectorates) {
+        var anOption = document.createElement('option')
+        anOption.setAttribute('value', anElectorate.name)
+        anOption.innerHTML = anElectorate.name
+        dropdown.appendChild(anOption)
+      }
+      return dropdown
+    }
+    function getTheElection(year) {
+      return NZ.allMyElections.find(e => e.year.toString() === year)
+    }
+    function electorateFileChangedHdlr(event) {
+      var theInput = event.target
+      for (var aFile of theInput.files) {
+        var fileReader = new FileReader()
+        fileReader.onload = electorateStringProcess
+        fileReader.readAsText(aFile)
+      }
+      if (theInput.files.length > 0) {
+        var secondInput = document.getElementById('listCandidateFileInput')
+        secondInput.addEventListener('change', listCandidateFileChangedHdlr)
+
+        var theDiv = document.getElementById('listCandidateFileInputDiv')
+        theDiv.style.display = 'block'
+      }
+    }
+    function electorateStringProcess(event) {
+      var theFile = event.target
+      // Split the stream into rows
+      var splitedRowCollection = theFile.result.split('\r\n')
+
+      for (var i = 0; i < splitedRowCollection.length - 3; i++) {
+        // Process first line
+        var theSplitedLine = splitedRowCollection[i].split(',')
+        if (i === 0) {
+          var year = Number(theSplitedLine[0])
+          var theElection = new Election(year)
+          NZ.addElection(theElection)
+        } else if (i === 1) {
+          var partyNameArray = theSplitedLine
+          partyNameArray.shift()
+          for (var partyNumber = 0; partyNumber < partyNameArray.length - 2; partyNumber++) {
+            // Add Party
+            theElection.addParty(partyNameArray[partyNumber])
+          }
+          //console.log(theElection.allMyParties)
+        } else {         // Process Electorate lines
+          // remove last two data: informal vote and vote sum
+          theSplitedLine.pop()
+
+          var electorateName = theSplitedLine[0]
+          theElection.addElectorate(electorateName)
+          // remove electorate name from the collection
+          theSplitedLine.shift()
+          // Conver string array to number array
+          var formalPartyVote = theSplitedLine.map(Number)
+          var theElectorate = theElection.allMyElectorates.find(e => e.name === electorateName)
+          //console.log(theElectorate)
+          theElectorate.addPartyVotes(formalPartyVote)
+        }
+      }
+
+
+    }
+    function listCandidateFileChangedHdlr(event) {
+      var theInput = event.target
+      for (var aFile of theInput.files) {
+        var fileReader = new FileReader()
+        fileReader.onload = listCandidateStringProcess
+        fileReader.readAsText(aFile)
+      }
+      if (theInput.files.length > 0) {
+        var thirdInput = document.getElementById('electorateWinnerFileInput')
+        thirdInput.addEventListener('change', electorateWinnerFileChangedHdlr)
+
+        var theDiv = document.getElementById('electorateWinnerFileInputDiv')
+        theDiv.style.display = 'block'
+
+      }
+    }
+    function listCandidateStringProcess(event) {
+      var candidateArray = []
+      var splitedRowCollection = event.target.result.split('\r\n')
+      var rowNumber = 0
+      var aParty = null
+      //console.log(splitedRowCollection.length )
+      do {
+        var aSplitedLine = splitedRowCollection[rowNumber].split(',')
+        if (rowNumber === 0) {  // This is first line
+          var year = Number(aSplitedLine[0])
+          //console.log( year)
+          var theElection = NZ.allMyElections.find(e => e.year === year)
+        } else {
+          // From second line
+          if (aSplitedLine[1] === '' && aSplitedLine[2] === '') {   // It is a Party name
+            if (aParty !== null) {
+              //console.log(aParty)
+              aParty.addListCandidates(candidateArray)
+              candidateArray = []
+            }
+            var aPartyName = aSplitedLine[0]
+            aParty = theElection.allMyParties.find(p => p.name === aPartyName.toUpperCase())
+            //console.log(aParty)
+          }
+          else {
+            var cadidateName = aSplitedLine[1].replace('"', '') + ',' + aSplitedLine[2].replace('"', '')
+            candidateArray.push(cadidateName)
+          }
+        }
+        rowNumber++
+        if (rowNumber === splitedRowCollection.length - 1) { aParty.addListCandidates(candidateArray) }
+      } while (rowNumber < splitedRowCollection.length - 1)
+      //console.log(theElection)
+    }
+    function electorateWinnerFileChangedHdlr(event) {
+      var theInput = event.target
+      for (var aFile of theInput.files) {
+        var fileReader = new FileReader()
+        fileReader.onload = electorateWinnerStringProcess
+        fileReader.readAsText(aFile)
+      }
+      var buttonDiv = document.getElementById('headButtonDisplay')
+        buttonDiv.style.display = 'block'
+    }
+    function electorateWinnerStringProcess(event) {
+      var theFileReader = event.target
+      var splitedRowCollection = theFileReader.result.split('\r\n')
+      var theElection
+      for (var rowNumber = 0; rowNumber < splitedRowCollection.length - 1; rowNumber++) {
+        var aSplitedLine = splitedRowCollection[rowNumber].split(',')
+        if (rowNumber === 0) {
+          var year = Number(aSplitedLine[0])
+           theElection = NZ.allMyElections.find(e => e.year === year)
+        }
+        else if (rowNumber === 1) { continue }
+        else {
+          var thelectorateName = aSplitedLine[0]
+          //console.log(thelectorateName)
+          var theWInnerName = aSplitedLine[1].replace('"', '') + ',' + aSplitedLine[2].replace('"', '')
+          //theWInnerName = theWInnerName.replace('"','')
+          //console.log(theWInnerName);
+          var thePartyName = aSplitedLine[3]
+          //console.log(thePartyName)
+          var theElectorate = theElection.allMyElectorates.find(e => e.name === thelectorateName)
+          //console.log(theElectorate)
+          theElectorate.addWinner(theWInnerName, thePartyName)
+        }
+      }
+      theElection.getAll()
+    }
+    function showOverview() {  // eslint-disable-line no-unused-vars
+      // Get div name
+      var div = document.getElementById('selectionDisplay')
+      // clear the content in div
+      clearDiv()
+      var yearDropDown = createYearDropdown('yearDropDown')
+      document.getElementById('selectionDisplay').innerHTML = ''
+      div.appendChild(yearDropDown)
+      // Create a button
+      var aButton = createButton('createOverviewBtn', 'createOverviewTable()', 'GO!')
+      div.appendChild(aButton)
+    }
+    function createOverviewTable() {  // eslint-disable-line no-unused-vars
+      // Get <div> element
+      var div = document.getElementById('tableDisplay')
+      // Clear the content in the div
+      clearDiv()
+      // Get the value of the selected option
+      var year = getSelectedOption('yearDropDown')
+      // Create and add <table>
+      var theTable = document.createElement('table')
+      div.appendChild(theTable)
+      // Add caption to the table
+      var caption = document.createElement('caption')
+      caption.innerHTML = 'Overview of ' + year
+      theTable.appendChild(caption)
+      // Add heads to the table
+      addTh(theTable, 'Party', 'Vote', 'Percentage', 'Electorate Seat', 'List Seat', 'Electorate', 'Winner')
+      // Get the Election of selected year
+      var theElection = NZ.allMyElections.find(e => e.year.toString() === year)
+      // Get the parties of selected year
+      for (var party of theElection.allEligibleParties) {
+        // add a new row
+        var row = addNewRow(theTable)
+        // Add cells to the row above
+        addCell(row, party.name)
+        addCell(row, party.votes)
+        var percentage = Math.round(party.eligiblePercentage * 10000) / 100 + '%'
+        addCell(row, percentage)
+        addCell(row, party.electorateSeatAmount)
+        addCell(row, party.listSeatAmount)
+        // find electorates won by the party
+        var electorateCollection = theElection.allMyElectorates.filter(e => e.myWinningCandidate.myParty.name === party.name.toUpperCase())
+        var electorateCell = row.insertCell(-1)
+        for (var electorate of electorateCollection) {
+          var td1 = document.createElement('td')
+          td1.innerHTML = electorate.name
+          electorateCell.appendChild(td1)
+          addNewLine(electorateCell)
+        }
+        var winnerCell = row.insertCell(-1)
+        for (var anElectorate of electorateCollection) {
+          var td2 = document.createElement('td')
+          td2.innerHTML = anElectorate.myWinningCandidate.name
+          winnerCell.appendChild(td2)
+          addNewLine(winnerCell)
+        }
+      }
+      var summaryRow =  addNewRow(theTable)
+      summaryRow.setAttribute('id','summaryRow')
+      addCell(summaryRow,'Total Vote')
+      addCell(summaryRow, theElection.voteSum )
+      addCell(summaryRow,'Total Eligible Vote')
+      addCell(summaryRow, theElection.eligibleVoteSum )
+      addCell(summaryRow,'Total Seat')
+      addCell(summaryRow, theElection.allMySeats.length )
+    }
+    function compareElectorateBetweenYears() {  // eslint-disable-line no-unused-vars
+      // Get div name
+      var selectionDiv = document.getElementById('selectionDisplay')
+      // Clear div
+      clearDiv()
+      selectionDiv.innerHTML = ''
+      var yearDropDown = createYearDropdown('yearDropDown')
+      document.getElementById('selectionDisplay').innerHTML = ''
+      selectionDiv.appendChild(yearDropDown)
+      // Get the year1
+      var year1 = getSelectedOption('yearDropDown')
+      // Creat a dropdown of Electorate
+      var electorateDropdown = createElectorateDropdown(year1)
+      selectionDiv.appendChild(electorateDropdown)
+      // Creat a dropdown for second year
+      var yearDropDown2 = createYearDropdown('yearDropDown2')
+      selectionDiv.appendChild(yearDropDown2)
+      // Creat a button
+      var btn = createButton('createElectorateBetweenYearsBtn', 'createElectorateBetweenYearsTable()', 'GO!')
+      selectionDiv.appendChild(btn)
+    }
+    function createElectorateBetweenYearsTable() { // eslint-disable-line no-unused-vars
+      // Get year1
+      var year1 = getSelectedOption('yearDropDown')
+      // Get year2
+      var year2 = getSelectedOption('yearDropDown2')
+      var anElectorateName = getSelectedOption('electorateDropdown')
+      // clear div
+      clearDiv()
+      // Create the first doughnut
+      createDoughnut( anElectorateName, year1)
+      // Create the sencond doughnut
+      createDoughnut( anElectorateName, year2)
+      // Add the first doughnut
+      // Add the second doughnut
+    }
+    function createDoughnut( anElectorateName, year) { // eslint-disable-line no-unused-vars
+      // get the Election
+      var theElection = getTheElection(year)
+      // get the Electorate
+      var anElectorate = theElection.allMyElectorates.find(e => e.name === anElectorateName)
+      var labourVote = anElectorate.voteMap['LABOUR PARTY']
+      var nationalVote = anElectorate.voteMap['NATIONAL PARTY']
+
+      var chartData = {
+        labels: ['Labour', 'National', 'Others'],
+        datasets: [{
+          label: ['canvas ' + anElectorate.name + ' ' + year],
+          backgroundColor: [window.chartColors.red, window.chartColors.blue, window.chartColors.yellow],
+          data: [
+            labourVote,
+            nationalVote,
+            anElectorate.totalValidVotes - labourVote - nationalVote
+          ]
+        }]
+      }
+      // get the <div>
+      var div = document.getElementById('chartDisplay')
+      // create a <canvas>
+      var cav = document.createElement('canvas')
+      cav.id = 'canvas ' + anElectorate.name + ' ' + year
+      // add <canvas> to div
+      div.appendChild(cav)
+      cav.style.maxHeight = '32em'
+      cav.style.maxWidth = '32em'
+      var ctx = document.getElementById(cav.id).getContext('2d')
+      window.myBar = new Chart(ctx, {
+        type: 'pie',
+        data: chartData,
+        options: {
+          cutoutPercentage: 30,
+          title: {
+            display: true,
+            text: anElectorate.name + ' in ' + year
+          },
+          tooltips: {
+            mode: 'index',
+            intersect: false
+          }
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>

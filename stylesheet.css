@@ -1,0 +1,81 @@
+/* RESET */
+
+html, body, div, span, h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, img, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, a, article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section {
+  /* Cancel out some differences between browser defaults */
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+* {
+  box-sizing: border-box;
+}
+select,button{
+  background-color: #81DAF5;
+  cursor: pointer;
+  font-size: 1em;
+  font-family:   Book Antiqua, Commons, arial, sans-serif;
+  padding: 3px ;
+  margin: 3px;
+  border: 2px solid #6dbffd;
+}
+.hidden{
+  display: none;
+}
+
+table {
+  background-color: #81c8ff;
+  font-family: Book Antiqua, Commons, arial, sans-serif;
+  border-spacing: 3px;
+  width: 85%;
+  margin: auto auto 2em auto;
+  text-align: center;
+}
+caption {
+  font: oblique;
+  font-style: oblique;
+  font-size: 2.2em;
+}
+th {
+  font-size: 1.2em;
+  border: 2px solid #c3e6ff;
+  padding: 2px;
+}
+td{
+  background-color: #ebfaff;
+}
+
+header{
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 2px;
+  border-bottom: 2px solid rgb(255, 214, 138);
+  position: fixed;
+  z-index: 999;
+
+  background: rgba(255, 235, 197,0.98);
+}
+main{
+  position: absolute;
+  top:0;
+  margin: 8rem 0em 0em 0em;
+  width: 100%;
+}
+canvas{
+  margin: auto;
+}
+input{
+  padding: 2px;
+}
+#inputDiv{
+  display: flex;
+}
+#summaryRow td{
+  font-size: 1.3em;
+  background-color: rgba(255, 205, 67,0.9);
+  text-align: center;
+}
