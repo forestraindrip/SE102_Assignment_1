@@ -69,8 +69,7 @@ class Party { // eslint-disable-line no-unused-vars
   }
 
   hasElectorateMP () {
-      var result =  this.allMyElectorateMPs.length > 0 
-      return result
+      return  this.allMyElectorateMPs.length > 0 
   }
 
   newMethod() {
