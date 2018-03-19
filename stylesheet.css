@@ -59,8 +59,7 @@ header{
   border-bottom: 2px solid rgb(255, 214, 138);
   position: fixed;
   z-index: 999;
-
-  background: rgba(255, 235, 197,0.98);
+  background: rgba(255, 235, 197,0.95);
 }
 main{
   position: absolute;
@@ -70,6 +69,8 @@ main{
 }
 canvas{
   margin: auto;
+  max-height: 40em;
+  max-width: 25em;
 }
 input{
   padding: 2px;

@@ -173,8 +173,6 @@
           theElectorate.addPartyVotes(formalPartyVote)
         }
       }
-
-
     }
     function listCandidateFileChangedHdlr(event) {
       var theInput = event.target
@@ -373,27 +371,20 @@
       var labourVote = anElectorate.voteMap['LABOUR PARTY']
       var nationalVote = anElectorate.voteMap['NATIONAL PARTY']
 
-      var chartData = {
-        labels: ['Labour', 'National', 'Others'],
-        datasets: [{
-          label: ['canvas ' + anElectorate.name + ' ' + year],
-          backgroundColor: [window.chartColors.red, window.chartColors.blue, window.chartColors.yellow],
-          data: [
-            labourVote,
-            nationalVote,
-            anElectorate.totalValidVotes - labourVote - nationalVote
-          ]
-        }]
-      }
+      var chartData = createDataset(anElectorate,year,
+                            ['Labour', 'National', 'Others'],
+                            [labourVote,
+                             nationalVote,
+                             anElectorate.totalValidVotes - labourVote - nationalVote])
       // get the <div>
-      var div = document.getElementById('chartDisplay')
+      let div = document.getElementById('chartDisplay')
       // create a <canvas>
       var cav = document.createElement('canvas')
       cav.id = 'canvas ' + anElectorate.name + ' ' + year
       // add <canvas> to div
       div.appendChild(cav)
-      cav.style.maxHeight = '32em'
-      cav.style.maxWidth = '32em'
+      // cav.style.maxHeight = '40em'
+      // cav.style.maxWidth = '25em'
       var ctx = document.getElementById(cav.id).getContext('2d')
       window.myBar = new Chart(ctx, {
         type: 'pie',
@@ -402,7 +393,7 @@
           cutoutPercentage: 30,
           title: {
             display: true,
-            text: anElectorate.name + ' in ' + year
+            text: anElectorate.name + ' in ' + year + ' [Winner: ' + anElectorate.myWinningCandidate.name + ']'
           },
           tooltips: {
             mode: 'index',
@@ -410,6 +401,16 @@
           }
         }
       })
+    }
+    function createDataset(anElectorate, year,labelArray, voteArray){
+       return {
+        labels: labelArray,
+        datasets: [{
+          label: ['canvas ' + anElectorate.name + ' ' + year],
+          backgroundColor: [window.chartColors.red, window.chartColors.blue, window.chartColors.yellow],
+          data: voteArray
+        }]
+      }
     }
   </script>
 </body>
