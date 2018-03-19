@@ -41,23 +41,20 @@
   </header>
   <main>
     <div id="tableDisplay"></div>
-    <div id = "chartDisplay">
-    </div>
+    <div id = "chartDisplay"></div>
   </main>
   <script>
     /* global  Chart,NewZealand,FileReader,Election,sessionStorage */
+    ////////////////////////////////////////////////
     var NZ = new NewZealand()
     sessionStorage.setItem('NZ', NZ)
     var go = function () {
-      changeBackgroundColour('OldLace')
       var fileInput = document.getElementById('electorateFileInput')
       fileInput.addEventListener('change', electorateFileChangedHdlr)
       console.log(NZ)
     }
     window.onload = go
-    function changeBackgroundColour(colourCode) {
-      document.body.style.backgroundColor = colourCode
-    }
+    ////////////////////////////////////////////////
     function createButton(id, event, message) {
       var aButton = document.createElement('button')
       aButton.id = id
@@ -220,7 +217,7 @@
             //console.log(aParty)
           }
           else {
-            var cadidateName = aSplitedLine[1].replace('"', '') + ',' + aSplitedLine[2].replace('"', '')
+            var cadidateName = aSplitedLine[1].replace(/"/g, '') + ',' + aSplitedLine[2].replace(/"/g, '')
             candidateArray.push(cadidateName)
           }
         }
@@ -253,7 +250,7 @@
         else {
           var thelectorateName = aSplitedLine[0]
           //console.log(thelectorateName)
-          var theWInnerName = aSplitedLine[1].replace('"', '') + ',' + aSplitedLine[2].replace('"', '')
+          var theWInnerName = aSplitedLine[1].replace(/"/g, '') + ',' + aSplitedLine[2].replace(/"/g, '')
           //theWInnerName = theWInnerName.replace('"','')
           //console.log(theWInnerName);
           var thePartyName = aSplitedLine[3]

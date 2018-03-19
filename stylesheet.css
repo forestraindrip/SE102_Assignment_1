@@ -12,6 +12,9 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, img, f
 * {
   box-sizing: border-box;
 }
+body{
+  background-color: oldlace;
+}
 select,button{
   background-color: #81DAF5;
   cursor: pointer;
@@ -78,4 +81,8 @@ input{
   font-size: 1.3em;
   background-color: rgba(255, 205, 67,0.9);
   text-align: center;
+}
+
+#chartDisplay{
+  display: flex;
 }
