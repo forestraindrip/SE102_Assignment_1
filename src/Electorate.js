@@ -30,7 +30,7 @@ class Electorate { // eslint-disable-line no-unused-vars
       let votes = this.allPartyVotes[i]
       this.myElection.addPartyVote(i, votes)
       sum += votes
-      var partyName = this.myElection.allMyParties[i].name.toUpperCase()
+      let partyName = this.myElection.allMyParties[i].name.toUpperCase()
       this.voteMap[partyName] = votes
     }
     this.totalValidVotes = sum

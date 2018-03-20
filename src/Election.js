@@ -82,21 +82,21 @@ class Election { // eslint-disable-line no-unused-vars
 
   // Calculate total vote
   calculateVoteSum (partyList) {
-    var amount = 0
-    for (var aParty of partyList) {
+    let amount = 0
+    for (let aParty of partyList) {
       amount += aParty.votes
     }
     return amount
   }
 
   calculateVotePercentage ([...partyList]) {
-    for (var aParty of partyList) {
+    for (let aParty of partyList) {
       aParty.percentage = aParty.votes / this.voteSum
     }
   }
 
   calculateEligbleVotePercentage ([...partyList]) {
-    for (var aParty of partyList) {
+    for (let aParty of partyList) {
       aParty.eligiblePercentage = aParty.votes / this.eligibleVoteSum
     }
   }
@@ -106,7 +106,7 @@ class Election { // eslint-disable-line no-unused-vars
   }
 
   filterEligibleParty () {
-    for (var aParty of this.allEligibleParties) {
+    for (let aParty of this.allEligibleParties) {
       //console.log( aParty.name);
       //console.log(aParty.percentage < 0.05 && !aParty.hasElectorateMP())
       
@@ -119,13 +119,13 @@ class Election { // eslint-disable-line no-unused-vars
 
   calculatePartySeatAmount () {
     // Percentage * total seat = expected seat amount for each party (Rounding)
-    for (var aParty of this.allEligibleParties) {
-      var partyExpectedSeatAmount = Math.round(120 * aParty.eligiblePercentage)
+    for (let aParty of this.allEligibleParties) {
+      let partyExpectedSeatAmount = Math.round(120 * aParty.eligiblePercentage)
       // filter Candidates are ElectorateMP
-      var arrayMP = aParty.allMyElectorateMPs
+      let arrayMP = aParty.allMyElectorateMPs
       //console.log(arrayMP.length)
       aParty.electorateSeatAmount = arrayMP.length
-      var listSeatAmount = partyExpectedSeatAmount - aParty.electorateSeatAmount
+      let listSeatAmount = partyExpectedSeatAmount - aParty.electorateSeatAmount
       aParty.listSeatAmount = listSeatAmount > 0 ? listSeatAmount : 0
       aParty.partySeatAmount = aParty.electorateSeatAmount + aParty.listSeatAmount
       this.totalSeatAmount += aParty.partySeatAmount
@@ -134,27 +134,27 @@ class Election { // eslint-disable-line no-unused-vars
 
   useSainteLagueFormula () {
     // store Quotient of each party
-    var quotientDivisorMap = new Map()
+    let quotientDivisorMap = new Map()
     // Set quotient for each eligible party  [Party, [quotient , divisor ,partyRemainSeat]]
-    for (var aParty of this.allEligibleParties) {
+    for (let aParty of this.allEligibleParties) {
       quotientDivisorMap.set(aParty, [aParty.votes, 1, aParty.partySeatAmount])
     }
     // Compare the quotients and pick the party with highest quotient
-    for (var i = 0; i < this.totalSeatAmount; i++) {
-      var partyWithMaxQuotient = this.allEligibleParties[0]
-      var maxQuotient = 0
-      for (var aParty of quotientDivisorMap.keys()) {
-        var partyQuotient = quotientDivisorMap.get(aParty)[0]
+    for (let i = 0; i < this.totalSeatAmount; i++) {
+      let partyWithMaxQuotient = this.allEligibleParties[0]
+      let maxQuotient = 0
+      for (let aParty of quotientDivisorMap.keys()) {
+        let partyQuotient = quotientDivisorMap.get(aParty)[0]
         if (partyQuotient > maxQuotient) {
           maxQuotient = partyQuotient
           partyWithMaxQuotient = aParty
         }
       }
 
-      var divisor = quotientDivisorMap.get(partyWithMaxQuotient)[1]
-      var quotient = partyWithMaxQuotient.votes / divisor
+      let divisor = quotientDivisorMap.get(partyWithMaxQuotient)[1]
+      let quotient = partyWithMaxQuotient.votes / divisor
       // remain seats for the party
-      var partyRemainSeat = quotientDivisorMap.get(partyWithMaxQuotient)[2]
+      let partyRemainSeat = quotientDivisorMap.get(partyWithMaxQuotient)[2]
 
       if (partyRemainSeat > 0) {
         this.allMySeats.push(partyWithMaxQuotient)
@@ -174,14 +174,14 @@ class Election { // eslint-disable-line no-unused-vars
   }
 
   allocateListMP () {
-    for (var aParty of this.allEligibleParties) {
+    for (let aParty of this.allEligibleParties) {
       // get candidate list with no Electorate MP
-      var noMPCandidateList = aParty.getNoMPList()
+      let noMPCandidateList = aParty.getNoMPList()
       // the start position to allocate list MP
-      var start = aParty.allMyElectorateMPs.length
+      let start = aParty.allMyElectorateMPs.length
       for (start; start < aParty.mySeatPositions.length; start++) {
-        var seatPosition = aParty.mySeatPositions[start]
-        var aListMP = noMPCandidateList[0]
+        let seatPosition = aParty.mySeatPositions[start]
+        let aListMP = noMPCandidateList[0]
         aListMP.mySeatPosition = seatPosition
         aParty.allMyListMPs.push(aListMP)
         noMPCandidateList.splice(0, 1)
@@ -214,12 +214,12 @@ class Election { // eslint-disable-line no-unused-vars
 
   // get seat numbers of each party (debug purpose)
   getPartySeatLocations (partyName) {
-    var result = ''
+    let result = ''
     result += partyName + '\n'
-    for (var i = 0; i < this.allMySeats.length; i++) {
-      var thePartyOwnstheSeat = this.allMySeats[i]
-      var aPartyName = partyName.toUpperCase()
-      var anotherPartyName = thePartyOwnstheSeat.name.toUpperCase()
+    for (let i = 0; i < this.allMySeats.length; i++) {
+      let thePartyOwnstheSeat = this.allMySeats[i]
+      let aPartyName = partyName.toUpperCase()
+      let anotherPartyName = thePartyOwnstheSeat.name.toUpperCase()
       if (anotherPartyName === aPartyName) {
         result += '[' + (i + 1) + '] '
       }
@@ -229,8 +229,8 @@ class Election { // eslint-disable-line no-unused-vars
 
   // shows how many seats each Party gets. Question 4-1
   showPartySeatAmount () {
-    var result = ''
-    for (var aParty of this.allMyParties) {
+    let result = ''
+    for (let aParty of this.allMyParties) {
       result += aParty.name + ' has total ' + aParty.partySeatAmount + ' seats.'
       if (aParty.partySeatAmount > 0) {
         result += View.TAB() + '(Electorate Seat:' + aParty.electorateSeatAmount
@@ -243,12 +243,12 @@ class Election { // eslint-disable-line no-unused-vars
 
   // shows list candidates who are MP. Question 4-2
   showListedMP () {
-    var result = ''
-    for (var aParty of this.allEligibleParties) {
+    let result = ''
+    for (let aParty of this.allEligibleParties) {
       result += aParty + View.NEWLINE()
       // remove list candidates are electorate MP
-      var listedMP = aParty.allMyListCandidates.filter(aCandidate => aCandidate.mySeatPosition !== undefined)
-      for (var i = 0; i < aParty.listSeatAmount; i++) {
+      let listedMP = aParty.allMyListCandidates.filter(aCandidate => aCandidate.mySeatPosition !== undefined)
+      for (let i = 0; i < aParty.listSeatAmount; i++) {
         result += listedMP[i] + ' has allocated to Seat "' + listedMP[i].mySeatPosition + '"' + View.NEWLINE()
       }
       result += View.NEWLINE()
