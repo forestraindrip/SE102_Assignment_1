@@ -41,7 +41,10 @@
   </header>
   <main>
     <div id="tableDisplay"></div>
-    <div id = "chartDisplay"></div>
+    <div id="chartDisplay">
+      <div id="chartDiv1"></div>
+      <div id="chartDiv2"></div>
+    </div>
   </main>
   <script>
     /* global  Chart,NewZealand,FileReader,Election,sessionStorage */
@@ -88,7 +91,9 @@
     function clearDiv() {
       var div = document.getElementById('tableDisplay')
       div.innerHTML = ''
-      div = document.getElementById('chartDisplay')
+      div = document.getElementById('chartDiv1')
+      div.innerHTML = ''
+      div = document.getElementById('chartDiv2')
       div.innerHTML = ''
     }
     function getSelectedOption(aSelectTag) {
@@ -215,7 +220,7 @@
             //console.log(aParty)
           }
           else {
-            var cadidateName = aSplitedLine[1].replace(/"/g, '') + ',' + aSplitedLine[2].replace(/"/g, '')
+            let cadidateName = (aSplitedLine[1] + ',' + aSplitedLine[2]).replace(/"/g, '')
             candidateArray.push(cadidateName)
           }
         }
@@ -232,7 +237,7 @@
         fileReader.readAsText(aFile)
       }
       var buttonDiv = document.getElementById('headButtonDisplay')
-        buttonDiv.style.display = 'block'
+      buttonDiv.style.display = 'block'
     }
     function electorateWinnerStringProcess(event) {
       var theFileReader = event.target
@@ -242,7 +247,7 @@
         var aSplitedLine = splitedRowCollection[rowNumber].split(',')
         if (rowNumber === 0) {
           var year = Number(aSplitedLine[0])
-           theElection = NZ.allMyElections.find(e => e.year === year)
+          theElection = NZ.allMyElections.find(e => e.year === year)
         }
         else if (rowNumber === 1) { continue }
         else {
@@ -318,14 +323,14 @@
           addNewLine(winnerCell)
         }
       }
-      var summaryRow =  addNewRow(theTable)
-      summaryRow.setAttribute('id','summaryRow')
-      addCell(summaryRow,'Total Vote')
-      addCell(summaryRow, theElection.voteSum )
-      addCell(summaryRow,'Total Eligible Vote')
-      addCell(summaryRow, theElection.eligibleVoteSum )
-      addCell(summaryRow,'Total Seat')
-      addCell(summaryRow, theElection.allMySeats.length )
+      var summaryRow = addNewRow(theTable)
+      summaryRow.setAttribute('id', 'summaryRow')
+      addCell(summaryRow, 'Total Vote')
+      addCell(summaryRow, theElection.voteSum)
+      addCell(summaryRow, 'Total Eligible Vote')
+      addCell(summaryRow, theElection.eligibleVoteSum)
+      addCell(summaryRow, 'Total Seat')
+      addCell(summaryRow, theElection.allMySeats.length)
     }
     function compareElectorateBetweenYears() {  // eslint-disable-line no-unused-vars
       // Get div name
@@ -357,13 +362,11 @@
       // clear div
       clearDiv()
       // Create the first doughnut
-      createDoughnut( anElectorateName, year1)
+      createDoughnut('chartDiv1', anElectorateName, year1)
       // Create the sencond doughnut
-      createDoughnut( anElectorateName, year2)
-      // Add the first doughnut
-      // Add the second doughnut
+      createDoughnut('chartDiv2', anElectorateName, year2)
     }
-    function createDoughnut( anElectorateName, year) { // eslint-disable-line no-unused-vars
+    function createDoughnut(divID, anElectorateName, year) { // eslint-disable-line no-unused-vars
       // get the Election
       var theElection = getTheElection(year)
       // get the Electorate
@@ -371,20 +374,18 @@
       var labourVote = anElectorate.voteMap['LABOUR PARTY']
       var nationalVote = anElectorate.voteMap['NATIONAL PARTY']
 
-      var chartData = createDataset(anElectorate,year,
-                            ['Labour', 'National', 'Others'],
-                            [labourVote,
-                             nationalVote,
-                             anElectorate.totalValidVotes - labourVote - nationalVote])
+      var chartData = createDataset(anElectorate, year,
+        ['Labour', 'National', 'Others'],
+        [labourVote,
+          nationalVote,
+          anElectorate.totalValidVotes - labourVote - nationalVote])
       // get the <div>
-      let div = document.getElementById('chartDisplay')
+      var div = document.getElementById(divID)
       // create a <canvas>
       var cav = document.createElement('canvas')
       cav.id = 'canvas ' + anElectorate.name + ' ' + year
       // add <canvas> to div
       div.appendChild(cav)
-      // cav.style.maxHeight = '40em'
-      // cav.style.maxWidth = '25em'
       var ctx = document.getElementById(cav.id).getContext('2d')
       window.myBar = new Chart(ctx, {
         type: 'pie',
@@ -402,8 +403,8 @@
         }
       })
     }
-    function createDataset(anElectorate, year,labelArray, voteArray){
-       return {
+    function createDataset(anElectorate, year, labelArray, voteArray) {
+      return {
         labels: labelArray,
         datasets: [{
           label: ['canvas ' + anElectorate.name + ' ' + year],
