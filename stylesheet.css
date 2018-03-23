@@ -49,15 +49,21 @@ th {
   font-size: 1.2em;
   border: 2px solid #c3e6ff;
   padding: 2px;
+  white-space: nowrap;
+  height: 10em;  
 }
+th > div{
+  transform: 
+  translate(0em, 4em)
+  rotate(-90deg);
+}
+
 td{
   background-color: #ebfaff;
 }
 
 header{
   top: 0;
-  left: 0;
-  right: 0;
   width: 100%;
   padding: 2px;
   border-bottom: 2px solid rgb(255, 214, 138);
@@ -68,7 +74,7 @@ header{
 main{
   position: absolute;
   top:0;
-  margin: 8rem 0em 0em 0em;
+  margin-top: 8em;
   width: 100%;
 }
 
@@ -94,4 +100,17 @@ input{
 
 #chartDisplay div {
   width: 50%;
+}
+
+@media screen and (max-width: 60em){
+  body{
+    max-width: 100%;
+  }
+  #chartDisplay{
+    flex-direction: column;
+    align-items: center;
+  }
+  main {
+    margin-top: 10em;
+  }
 }

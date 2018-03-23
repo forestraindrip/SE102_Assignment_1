@@ -71,9 +71,18 @@
     function addTh(aTable, ...headerArray) {
       let row = document.createElement('tr')
       for (let header of headerArray) {
+        // let th = document.createElement('th')
+        // let div = document.createElement('div')
+        // let span = document.createElement('span')
+        // span.innerHTML = header
+        // row.appendChild(th)
+        // th.appendChild(div)
+        // div.appendChild(span)
         let th = document.createElement('th')
-        th.innerHTML = header
+        let div = document.createElement('div')
+        div.innerHTML = header
         row.appendChild(th)
+        th.appendChild(div)
       }
       aTable.appendChild(row)
     }
